@@ -13,12 +13,12 @@ class AutoEncoder:
     def train(self, samples, alpha = 0.05):
         delta = numpy.matrix([[0.0 for x in xrange(self.V)] for y in xrange(self.H)]).transpose()
         for x in samples:
-          y = self.encode(x)
-          z = self.decode(y)
+            y = self.encode(x)
+            z = self.decode(y)
 
-          sum = numpy.dot(self.weight, x-z)
-          delta += numpy.dot((x-z), y.transpose())
-          delta += numpy.dot(x, numpy.multiply(numpy.multiply(y, 1.0-y), sum).transpose())
+            sum = numpy.dot(self.weight, x-z)
+            delta += numpy.dot((x-z), y.transpose())
+            delta += numpy.dot(x, numpy.multiply(numpy.multiply(y, 1.0-y), sum).transpose())
 
         self.weight += alpha * delta.transpose() / len(samples)
 
