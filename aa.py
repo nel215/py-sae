@@ -52,7 +52,6 @@ if __name__=='__main__':
 
     V = samples[0].shape[0]
     H = 2*V
-    print V,H
 
     aa = AutoEncoder(V,H)
 
