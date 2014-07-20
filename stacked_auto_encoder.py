@@ -1,7 +1,7 @@
 #coding: utf-8
 import requests
 import random, numpy
-from aa import AutoEncoder
+from auto_encoder import AutoEncoder
 
 
 class StackedAutoEncoder:
