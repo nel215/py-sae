@@ -51,41 +51,30 @@ class StackedAutoEncoder:
                 outputs.append(sigmoid(numpy.dot(w, outputs[-1])))
             print outputs
 
-
-
-
-
-
-
 if __name__=='__main__':
     # 0-1 dataset
     features, labels = get_binary_dataset()
 
+    N = len(features)
     V = len(features[0])
-    H = 2*V
 
     sae = StackedAutoEncoder(V, [V+2,V])
 
-    #for i in xrange(1000):
-    #    j = int(random.random()*len(samples))
-    #    #print samples[j:j+10]
-    #    sae.train(samples[j:j+10])
-    #    if i<100 or i%1000 == 0:
-    #        print sae.error(samples)
+    for i in xrange(1000):
+        j = int(random.random()*N)
+        sae.train(features[j:j+10])
+        if i<100 or i%1000 == 0:
+            print sae.error(features)
 
-    #sae.fix_traning_layer()
+    sae.fix_traning_layer()
 
-    #for i in xrange(1000):
-    #    j = int(random.random()*len(samples))
-    #    #print samples[j:j+10]
-    #    sae.train(samples[j:j+10])
-    #    if i<100 or i%1000 == 0:
-    #        print sae.error(samples)
+    for i in xrange(1000):
+        j = int(random.random()*N)
+        sae.train(features[j:j+10])
+        if i<100 or i%1000 == 0:
+            print sae.error(features)
 
-    #for sample in samples:
-    #    print sae.output(sample)
-
-    #sae.fix_traning_layer()
+    sae.fix_traning_layer()
 
     #for i in xrange(1000):
     #    j = int(random.random()*len(samples))
