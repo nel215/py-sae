@@ -29,7 +29,7 @@ def get_mushroom_dataset():
     dataset = filter(lambda data: len(data)>1, dataset.split('\n'))
     for data in dataset:
         data = data.split(' ')
-        labels.append(1 if data[0] == '2' else 0)
+        labels.append([1] if data[0] == '2' else [0])
         feature = [0 for f in xrange(num_feature)]
         for [bin, _] in map(lambda d: d.split(':'), filter(lambda d: len(d)>1, data[1:])):
             feature[int(bin)-1] = 1
