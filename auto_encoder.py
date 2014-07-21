@@ -33,27 +33,30 @@ class AutoEncoder:
         return sigmoid(h2)
 
     def error(self, features):
+        eps = 1e-9
         error = numpy.array([[0.0] for x in xrange(self.V)])
         for x in features:
             # TODO: add bias term.
             x = numpy.array([x]).transpose()
             y = self.encode(x)
             z = self.decode(y)
-            error += numpy.multiply(x, numpy.log(z)) - numpy.multiply((1.0 - x), numpy.log(1.0 - z))
+            error += numpy.multiply(x, numpy.log(z+eps)) - numpy.multiply((1.0-x), numpy.log(1.0-z+eps))
         return numpy.sum(error)
-
-
 
 if __name__=='__main__':
     features, labels = get_binary_dataset()
 
+
     N = len(features)
+
+    for i in xrange(N):
+        features[i] += [1]
     V = len(features[0])
     H = 2*V
 
     aa = AutoEncoder(V,H)
 
-    for i in xrange(1000):
+    for i in xrange(10000):
         j = int(random.random()*N)
         aa.train(features[j:j+10])
         if i<100 or i%1000 == 0:
