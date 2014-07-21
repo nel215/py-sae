@@ -3,7 +3,7 @@
 import random, numpy
 from function import sigmoid, sigmoid_prime
 from auto_encoder import AutoEncoder
-from dataset import get_binary_dataset
+from dataset import get_mushroom_dataset
 
 
 class StackedAutoEncoder:
@@ -38,7 +38,7 @@ class StackedAutoEncoder:
 
             print "create prediction layer"
 
-    def fine_tuning(self, features, labels, alpha = 0.1):
+    def fine_tuning(self, features, labels, alpha = 0.05):
         num_weights = len(self.weights)
         for x, z in zip(features, labels):
             outputs = [numpy.array([x]).transpose()]
@@ -68,32 +68,38 @@ class StackedAutoEncoder:
             outputs.append(sigmoid(numpy.dot(w, outputs[-1])))
         return outputs[-1]
 
-
-
-
+    def fine_tuning_error(self, features, labels):
+        eps = 1e-9
+        error = numpy.array([[0.0] for a in labels])
+        for x,a in zip(features, labels):
+            z = self.predict(x)
+            a = numpy.array(a)
+            error += numpy.multiply(a, numpy.log(z+eps)) - numpy.multiply((1.0-a), numpy.log(1.0-z+eps))
+        return numpy.sum(error)
 
 if __name__=='__main__':
     # 0-1 dataset
-    features, labels = get_binary_dataset()
+    features, labels = get_mushroom_dataset()
 
     N = len(features)
+    for i in xrange(N):
+        features[i] += [1]
+
     V = len(features[0])
 
 
-    sae = StackedAutoEncoder(V, [V+2,V+4])
+    sae = StackedAutoEncoder(V, [V/2,V/3])
 
     indices = range(N)
     random.shuffle(indices)
-    print len(features)
     train_features = numpy.take(features, indices[:3*N/4], axis=0).tolist()
     train_labels   = numpy.take(labels, indices[:3*N/4], axis=0).tolist()
     test_features = numpy.take(features, indices[3*N/4:], axis=0).tolist()
     test_labels   = numpy.take(labels, indices[3*N/4:], axis=0).tolist()
-    print len(train_features)
 
 
     print "---layer1---"
-    for i in xrange(10000):
+    for i in xrange(1000):
         j = int(random.random()*3*(N-10)/4)
         sae.train(train_features[j:j+10])
         if i<100 or i%1000 == 0:
@@ -102,7 +108,7 @@ if __name__=='__main__':
     sae.fix_traning_layer()
 
     print "---layer2---"
-    for i in xrange(10000):
+    for i in xrange(1000):
         j = int(random.random()*3*(N-10)/4)
         sae.train(train_features[j:j+10])
         if i%1000 == 0:
@@ -111,17 +117,24 @@ if __name__=='__main__':
     sae.fix_traning_layer()
 
     print "---fine-tuning---"
-    for i in xrange(5000):
+    for i in xrange(1000):
+        if i<10 or i%50 == 0:
+            print sae.fine_tuning_error(train_features, train_labels)
         j = int(random.random()*3*(N-10)/4)
-        sae.fine_tuning(train_features[j:j+10], train_labels[j:j+10])
+        indices = range(len(train_features))
+        random.shuffle(indices)
+        subset_train_features = numpy.take(train_features, indices[:10], axis=0).tolist()
+        subset_train_labels   = numpy.take(train_labels, indices[:10], axis=0).tolist()
 
-    correct = 0
-    for x,z in zip(test_features, test_labels):
-        z_prime = sae.predict(x)
-        z_prime = 1 if z_prime[0][0] >= 0.5 else 0
-        if z_prime is int(z[0]): correct += 1
-        print int(z[0]), z_prime
-    print 100.0 * correct / len(test_features)
+        sae.fine_tuning(subset_train_features, subset_train_labels)
+
+        if i<10 or i%50 == 49:
+            correct = 0
+            for x,z in zip(test_features, test_labels):
+                z_prime = sae.predict(x)
+                z_prime = 1 if z_prime[0][0] >= 0.5 else 0
+                if z_prime is int(z[0]): correct += 1
+            print 100.0 * correct / len(test_features)
 
 
 
